@@ -1,11 +1,24 @@
 <template>
   <div>
+    <h3>Account</h3>
+    <span>
+        Amano
+    </span>
     <h3>Current Url:</h3>
-    <p>{{ tabUrl }}</p>
-    <h3>Test Value:</h3>
-    <p>{{ defaultText }}</p>
+    <li>
+        <div>
+            <span>
+                {{ tabUrl }}
+            </span>
+            <button>Mark</button>
+        </div>
+    </li>
+    <!-- <h3>Test Value:</h3>
+    <p>{{ defaultText }}</p> -->
     <h3>Found Urls:</h3>
-    <p :key="f" v-for="f in foundUrls">{{ f }}</p>
+    <div class="urls-container">
+        <li :key="f" v-for="f in foundUrls">{{ f }}</li>
+    </div>
   </div>
 </template>
 
@@ -28,23 +41,17 @@ export default {
   methods: {
     initTabUrl () {
       chrome.tabs.getSelected(null, (tab) => {
-        console.log('tab.id', tab.id)
-        console.log('tab.url', tab.url)
         console.log('tab', tab)
         this.tabUrl = tab.url
       })
     },
     initAllUrl () {
-      console.log('document', document)
-      const links = document.getElementsByTagName('a')
-      console.log('links', links)
-      const urls = []
-
-      for (let i = 0; i < links.length; i++) {
-        urls.push(links[i].getAttribute('href'))
-      }
-      console.log('urls', urls)
-      this.foundUrls = urls
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'getAllUrl' }, (response) => {
+          console.log('xx from helloword', response)
+          this.foundUrls = response
+        })
+      })
     }
   },
 
@@ -57,7 +64,10 @@ export default {
 </script>
 
 <style scoped>
-p {
+/* p {
   font-size: 20px;
+} */
+.urls-container {
+
 }
 </style>

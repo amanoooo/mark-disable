@@ -1,41 +1,29 @@
 <template>
   <div>
-    <h3>Account</h3>
-    <span>
-        Amano
-    </span>
+    <h3>Version</h3>
+    <span> {{version}} </span>
+    <h3>Description</h3>
+    <span>Only support using same preference, please help us commiting blockingList </span>
     <h3>Current Url:</h3>
-    <li>
-        <div>
-            <span>
-                {{ tabUrl }}
-            </span>
-            <button>Mark</button>
-        </div>
-    </li>
-    <!-- <h3>Test Value:</h3>
-    <p>{{ defaultText }}</p> -->
+    <MRow :list="[tabUrl]"/>
     <h3>Found Urls:</h3>
-    <div class="urls-container">
-        <li :key="f" v-for="f in foundUrls">{{ f }}</li>
-    </div>
+    <MRow :list="foundUrls"/>
   </div>
 </template>
 
 <script>
+import MRow from './MRow.vue'
 export default {
   name: 'HelloWorld',
   mounted () {
-    console.log('mount')
     browser.runtime.sendMessage({})
-
     this.initTabUrl()
     this.initAllUrl()
   },
   data () {
     return {
-      tabUrl: 'x',
-      foundUrls: [1, 2]
+      tabUrl: '',
+      foundUrls: []
     }
   },
   methods: {
@@ -47,19 +35,45 @@ export default {
     },
     initAllUrl () {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'getAllUrl' }, (response) => {
-          console.log('xx from helloword', response)
-          this.foundUrls = response
-        })
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          { type: 'getAllUrl' },
+          (response) => {
+            console.log('response', response)
+            this.foundUrls = response.filter(this.validateUrl)
+          }
+        )
       })
+    },
+    validateUrl (url) {
+      if (!url) {
+        return false
+      }
+      if (!url.trim()) {
+        return false
+      }
+      if (url.includes('#')) {
+        return false
+      }
+      if (url.indexOf('javascript:void(0)') > -1) {
+        return false
+      }
+      if (url.trim() === '/') {
+        return false
+      }
+      return true
     }
-  },
 
+  },
   computed: {
     defaultText () {
       return browser.i18n.getMessage('extName')
+    },
+    version() {
+      return chrome.runtime.getManifest().version
     }
-  }
+  },
+  components: { MRow }
 }
 </script>
 
@@ -68,6 +82,5 @@ export default {
   font-size: 20px;
 } */
 .urls-container {
-
 }
 </style>

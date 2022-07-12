@@ -13,6 +13,7 @@
 
 <script>
 import MRow from './MRow.vue'
+import axios from 'axios'
 export default {
   name: 'HelloWorld',
   mounted () {
@@ -39,13 +40,15 @@ export default {
           tabs[0].id,
           { type: 'getAllUrl' },
           (response) => {
-            console.log('response', response)
-            this.foundUrls = response.filter(this.validateUrl)
+            this.foundUrls = Array.from(new Set(response)).filter(this.filterUrl)
+            console.log(2)
+            this.syncUrlInfoList()
+            console.log(3)
           }
         )
       })
     },
-    validateUrl (url) {
+    filterUrl (url) {
       if (!url) {
         return false
       }
@@ -58,10 +61,23 @@ export default {
       if (url.indexOf('javascript:void(0)') > -1) {
         return false
       }
+      if (url.indexOf('javascript:;') > -1) {
+        return false
+      }
+      if (url.indexOf('javascript:;') > -1) {
+        return false
+      }
       if (url.trim() === '/') {
         return false
       }
       return true
+    },
+    async syncUrlInfoList () {
+      console.log('1')
+      const urlInfoList = this.foundUrls.map(url => ({ url }))
+      console.log('urlInfoList', urlInfoList)
+      const response = await axios.post('http://localhost:8080/url/bulk_validate', { urlInfoList })
+      console.log('response', response)
     }
 
   },
@@ -69,7 +85,7 @@ export default {
     defaultText () {
       return browser.i18n.getMessage('extName')
     },
-    version() {
+    version () {
       return chrome.runtime.getManifest().version
     }
   },

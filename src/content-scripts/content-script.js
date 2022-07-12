@@ -8,7 +8,6 @@ function getAllUrl () {
   for (let i = 0; i < links.length; i++) {
     urls.push(links[i].getAttribute('href'))
   }
-  console.log('', urls)
   return urls
 }
 

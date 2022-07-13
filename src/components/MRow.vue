@@ -2,18 +2,28 @@
     <div class="mrow-container">
         <div class="wrapper" v-for="item in list" :key="item">
             <li class="li" :title="item">{{ item }}</li>
-            <button class="btn">Commit</button>
+            <button class="btn" @click="onClick(item)">Commit</button>
         </div>
     </div>
 </template>
 
 <script>
+// import Axios from 'axios'
+import axios from 'axios'
+
 export default {
   data () {
     return {}
   },
   props: {
     list: []
+  },
+  methods: {
+    async onClick (e) {
+      console.log('e', e)
+      const response = await axios.post('http://localhost:8080/url/commit', { url: e })
+      console.log('x response', response)
+    }
   }
 }
 </script>

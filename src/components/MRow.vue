@@ -2,7 +2,7 @@
     <div class="mrow-container">
         <div class="wrapper" v-for="item in list" :key="item.url">
             <li class="li" :title="item" :class="item.isBlocked ? 'blocked': ''">{{ item.url }}</li>
-            <button class="btn" :disabled="item.isBlocked" @click="onClick(item)">Blocked</button>
+            <button class="btn" :disabled="item.isBlocked" @click="onClick(item)">{{ item.isBlocked ? 'Blocked' : 'Commit' }}</button>
         </div>
     </div>
 </template>

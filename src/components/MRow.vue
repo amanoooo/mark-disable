@@ -1,8 +1,8 @@
 <template>
     <div class="mrow-container">
-        <div class="wrapper" v-for="item in list" :key="item">
-            <li class="li" :title="item">{{ item }}</li>
-            <button class="btn" @click="onClick(item)">Commit</button>
+        <div class="wrapper" v-for="item in list" :key="item.url">
+            <li class="li" :title="item" :class="item.isBlocked ? 'blocked': ''">{{ item.url }}</li>
+            <button class="btn" :disabled="item.isBlocked" @click="onClick(item)">Blocked</button>
         </div>
     </div>
 </template>
@@ -11,6 +11,7 @@
 // import Axios from 'axios'
 import axios from 'axios'
 
+// type UrlInfo = { url: String, isBlocked: Boolean}[]
 export default {
   data () {
     return {}
@@ -44,6 +45,9 @@ export default {
             text-overflow: ellipsis;
             white-space: nowrap;
             // cursor: grab;
+        }
+        .blocked {
+            text-decoration:line-through;
         }
         .li:hover {
             // cursor: grab;

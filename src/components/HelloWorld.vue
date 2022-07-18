@@ -73,11 +73,11 @@ export default {
       return true
     },
     async syncUrlInfoList () {
-      console.log('1')
       const urlInfoList = this.foundUrls.map(url => ({ url }))
-      console.log('urlInfoList', urlInfoList)
       const response = await axios.post('http://localhost:8080/url/bulk_validate', { urlInfoList })
-      console.log('response', response)
+      const data = response?.data?.data || []
+      console.log('data', data)
+      this.foundUrls = this.foundUrls.map((url, index) => ({ url, isBlocked: data[index] || false }))
     }
 
   },

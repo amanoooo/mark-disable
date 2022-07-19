@@ -16,7 +16,7 @@
 import MRow from './MRow.vue'
 import axios from 'axios'
 export default {
-  name: 'HelloWorld',
+  name: 'HomePage',
   mounted () {
     browser.runtime.sendMessage({})
     this.initTabUrl()

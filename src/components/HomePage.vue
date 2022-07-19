@@ -8,7 +8,7 @@
     <MRow :list="[tabInfo]" @commitOne="commitOne" isTab />
     <h3>Found Urls:</h3>
     <MRow :list="foundUrls" @commitOne="commitOne"/>
-    <button @click="syncUrlInfoList">Retry</button>
+    <button @click="initAllUrl">Refresh</button>
   </div>
 </template>
 
@@ -28,7 +28,8 @@ export default {
         url: '',
         isBlocked: false
       },
-      foundUrls: []
+      foundUrls: [],
+      chromeTabInfo: {}
     }
   },
   methods: {
@@ -40,11 +41,12 @@ export default {
     },
     initAllUrl () {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        this.chromeTabInfo = tabs[0]
         chrome.tabs.sendMessage(
-          tabs[0].id,
+          this.chromeTabInfo.id,
           { type: 'getAllUrl' },
           (response) => {
-            this.foundUrls = Array.from(new Set(response)).filter(this.filterUrl).map(url => ({ url }))
+            this.foundUrls = Array.from(new Set(response)).map(url => ({ url }))
             this.syncUrlInfoList()
           }
         )
@@ -61,45 +63,28 @@ export default {
           this.foundUrls[index].isBlocked = true
           this.foundUrls = [...this.foundUrls]
         }
+        this.render()
       }
     },
 
-    filterUrl (url) {
-      if (!url) {
-        return false
-      }
-      if (!url.trim()) {
-        return false
-      }
-      if (url.includes('#')) {
-        return false
-      }
-      if (url.indexOf('javascript:void(0)') > -1) {
-        return false
-      }
-      if (url.indexOf('javascript:;') > -1) {
-        return false
-      }
-      if (url.indexOf('javascript:;') > -1) {
-        return false
-      }
-      if (url.trim() === '/') {
-        return false
-      }
-      if (url.trim().startsWith('mailto')) {
-        return false
-      }
-      return true
+    render () {
+      const blockedUrlInfos = this.foundUrls.filter(i => i.isBlocked)
+
+      chrome.tabs.sendMessage(
+        this.chromeTabInfo.id,
+        { type: 'render', blockedUrlInfos }
+      )
     },
+
     async syncUrlInfoList () {
       const urlInfoList = [this.tabInfo].concat(this.foundUrls)
-      console.log('urlInfoList', urlInfoList)
       const response = await axios.post('http://localhost:8080/url/bulk_validate', { urlInfoList })
       const data = response?.data?.data || []
-      console.log('data', data)
       // mutate
       this.tabInfo.isBlocked = data.shift()
       this.foundUrls = this.foundUrls.map(({ url }, index) => ({ url, isBlocked: data[index] || false }))
+
+      this.render()
     }
 
   },

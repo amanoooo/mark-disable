@@ -1,15 +1,14 @@
 <template>
     <div class="mrow-container">
-        <div class="wrapper" v-for="item in list" :key="item.url">
-            <li class="li" :title="item" :class="item.isBlocked ? 'blocked': ''">{{ item.url }}</li>
-            <button class="btn" :disabled="item.isBlocked" @click="onClick(item)">{{ item.isBlocked ? 'Blocked' : 'Commit' }}</button>
+        <div class="wrapper" v-for="item, index in list" :key="item.url">
+            <li class="li" :title="item.url" :class="item.isBlocked ? 'blocked': ''">{{ item.url }}</li>
+            <button class="btn" :disabled="item.isBlocked" @click="onClick(index)">{{ item.isBlocked ? 'Blocked' : 'Commit' }}</button>
         </div>
     </div>
 </template>
 
 <script>
 // import Axios from 'axios'
-import axios from 'axios'
 
 // type UrlInfo = { url: String, isBlocked: Boolean}[]
 export default {
@@ -17,13 +16,12 @@ export default {
     return {}
   },
   props: {
-    list: []
+    list: [],
+    isTab: Boolean
   },
   methods: {
-    async onClick (e) {
-      console.log('e', e)
-      const response = await axios.post('http://localhost:8080/url/commit', { url: e })
-      console.log('x response', response)
+    async onClick (index) {
+      this.$emit('commitOne', index, this.isTab)
     }
   }
 }
@@ -41,6 +39,7 @@ export default {
 
         .li {
             max-width: 600px;
+            min-width : 300px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
